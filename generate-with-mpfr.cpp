@@ -129,7 +129,7 @@ void gen_fun1() {
 void gen_sincos()
 {
   auto qpfile = std::fopen("reference-sincos-qp.dat", "w");
-  auto epfile = std::fopen("reference-sincos-dep.dat", "w");
+  auto epfile = std::fopen("reference-sincos-ep.dat", "w");
   auto dpfile = std::fopen("reference-sincos-dp.dat", "w");
   auto spfile = std::fopen("reference-sincos-sp.dat", "w");
   mpfr_t qx, qs, qc, tmp;

@@ -74,7 +74,7 @@ public:
     std::printf("\nGenerating %d qp, ep, dp, and sp %s values %s     ", int(n), fun_name,
                 range);
     for (long i = 0; i < n; ++i) {
-      init_fun(i, qx);
+      init_fun(i, qx, n - 1);
       print();
       std::printf("\033[4D%3i%%", int(i * 100 / (n - 1)));
     }
@@ -85,17 +85,17 @@ public:
 constexpr long n = 32 * 97 * 89;
 constexpr long n2 = n / 11;
 
-template <long From = 0, long To = 1> void init(long i, mpfr_t& x)
+template <long From = 0, long To = 1> void init(long i, mpfr_t& x, long count)
 {
   mpfr_set_si(x, i, MPFR_RNDN);
   mpfr_mul_si(x, x, To - From, MPFR_RNDN);
-  mpfr_div_si(x, x, n, MPFR_RNDN);
+  mpfr_div_si(x, x, count, MPFR_RNDN);
   mpfr_add_si(x, x, From, MPFR_RNDN);
 };
 
-template <long From = 0, long To = 1> void init_pi4(long i, mpfr_t& x)
+template <long From = 0, long To = 1> void init_pi4(long i, mpfr_t& x, long count)
 {
-  init<From, To>(i, x);
+  init<From, To>(i, x, count);
   static mpfr_t pi;
   static bool init = false;
   if (!init) {
@@ -107,15 +107,27 @@ template <long From = 0, long To = 1> void init_pi4(long i, mpfr_t& x)
 
 template <typename From, typename To> constexpr decltype(auto) make_init(From from, To to)
 {
-  return [=](long i, mpfr_t& x) {
+  return [=](long i, mpfr_t& x, long count) {
     mpfr_set_si(x, i, MPFR_RNDN);
     mpfr_mul_si(x, x, to - from, MPFR_RNDN);
-    mpfr_div_si(x, x, n, MPFR_RNDN);
+    mpfr_div_si(x, x, count, MPFR_RNDN);
     mpfr_add_si(x, x, from, MPFR_RNDN);
   };
 }
 
 void gen_fun1() {
+  Fun1("ln", mpfr_log)
+      .loop(n, "[0, 1]", init<0, 1>)
+      .loop(n2, "[1, 10]", init<1, 10>)
+      .loop(n, "[10, 10¹⁴]", make_init(10, 1.e14));
+  Fun1("log10", mpfr_log10)
+      .loop(n, "[0, 1]", init<0, 1>)
+      .loop(n2, "[1, 10]", init<1, 10>)
+      .loop(n, "[10, 10¹⁴]", make_init(10, 1.e14));
+  Fun1("log2", mpfr_log2)
+      .loop(n, "[0, 1]", init<0, 1>)
+      .loop(n2, "[1, 10]", init<1, 10>)
+      .loop(n, "[10, 10¹⁴]", make_init(10, 1.e14));
   Fun1("acos", mpfr_acos).loop(n + 1, "[0, 1]", init<0, 1>);
   Fun1("asin", mpfr_asin).loop(n + 1, "[0, 1]", init<0, 1>);
   Fun1("atan", mpfr_atan)
